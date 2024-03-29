@@ -101,20 +101,22 @@ public class CursoController {
     }
 
     @GetMapping("/export/pdf")
-    public void generarReportePdf(HttpServletResponse response) throws IOException {
+    public void generarReportePdf(HttpServletResponse response) throws IOException { // Método que maneja la solicitud y genera el PDF.
 
-        response.setContentType("application/pdf");
+        response.setContentType("application/pdf"); // Establece el tipo de contenido de la respuesta como PDF.
+
+        // Crea un formato de fecha y hora y Formatea la fecha y hora actual.
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
         String currentDateTime = dateFormat.format(new Date());
 
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=cursos" + currentDateTime + ".pdf";
-        response.setHeader(headerKey, headerValue);
+        String headerKey = "Content-Disposition"; // Define la clave del emcabezado para la decarga del archivo.
+        String headerValue = "attachment; filename=cursos" + currentDateTime + ".pdf"; // Define el valor del emcabezado con el nombre del archivo.
+        response.setHeader(headerKey, headerValue); // Establece el encabezado en la respuesta para indicar que es un archivo adjunto.
 
-        List<Curso> cursos = iCursoRepository.findAll();
+        List<Curso> cursos = iCursoRepository.findAll(); // Recupera todos los cursos de la base de datos.
 
-        CursoExporterPDF exporterPDF = new CursoExporterPDF(cursos);
-        exporterPDF.export(response);
+        CursoExporterPDF exporterPDF = new CursoExporterPDF(cursos); // Crea una instancia de CursoExporterPDf con la lista de cursos.
+        exporterPDF.export(response); // Genera el PDF y lo escribe en la respuesta http.
 
     }
 

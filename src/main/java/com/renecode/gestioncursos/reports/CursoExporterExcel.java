@@ -21,12 +21,23 @@ public class CursoExporterExcel {
 
     private List<Curso> cursos;
 
+    /**
+     * <p>Se inicializa el contructor pasandole una lista de objetos <bold>Curso</bold>.</p>
+     * También se inicializa el workbook.
+     * */
     public CursoExporterExcel(List<Curso> cursos) {
         this.cursos = cursos;
         workbook = new XSSFWorkbook();
 
     }
 
+    /**
+     * <ul>
+     *     <li>Creamos un página con el nombre de "Cursos".</li>
+     *     <li>Que estara en en la fila 0.</li>
+     *     <li>Diseñamos la fuente y se la aplicamos en la celdas de nuestra fila header.</li>
+     * </ul>
+     * */
     private void writeHeaderLine() {
 
         sheet = workbook.createSheet("Cursos");
@@ -47,13 +58,17 @@ public class CursoExporterExcel {
 
     }
 
+    /**
+     * Este método es una función auxiliar que crea una celda en la fila especifica con el valor
+     * y estilo proporcionados.
+     * */
     private void createCell(Row row, int columnCount, Object value, CellStyle style) {
 
-        sheet.autoSizeColumn(columnCount);
-        Cell cell = row.createCell(columnCount); // Vamos a crear una celda apartir del número de columnas.
+        sheet.autoSizeColumn(columnCount); // Dependiendo del tipo de contenido ese será el tamaño de la columna.
+        Cell cell = row.createCell(columnCount); // Se crea una celda en la fila y columna especifica por columnCount.
 
-        if (value instanceof Integer) {
-            cell.setCellValue((Integer)value);
+        if (value instanceof Integer) { // Si value es una instancia de Integer
+            cell.setCellValue((Integer)value); // se asigna un valor númerico.
 
         } else if (value instanceof Boolean) {
             cell.setCellValue((Boolean)value);
@@ -67,21 +82,29 @@ public class CursoExporterExcel {
 
     }
 
+    /**
+     * Este método es el responsable de llenar la hoja con los datos de los cursos.
+     * */
     private void writeDataLines() {
 
-        int rowCount = 1;
+        int rowCount = 1; // Inicializa el contador de filas en 1, ya que la fila 0 se usa para el emcabezado.
 
+        // Crea un estilo de celda para los datos.
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
 
+        // Configura el estilo de fuente para los datos.
         font.setFontHeight(14);
         style.setFont(font);
 
+        // Itera sobre la lista de cursos.
         for (Curso curso : cursos) {
 
+            // crea una nueva fila en la hoja en la hoja para cada curso.
             Row row = sheet.createRow(rowCount++);
-            int columnCount = 0;
+            int columnCount = 0; //Inicializa el contador de columnas en 0.
 
+            // Llena la fila con los datos del curso.
             createCell(row, columnCount++, curso.getId(), style);
             createCell(row, columnCount++, curso.getTitulo(), style);
             createCell(row, columnCount++, curso.getDescripcion(), style);
@@ -91,14 +114,20 @@ public class CursoExporterExcel {
         }
     }
 
+    /**
+     * Este método es el encargado de escribir los datos de los cursos en la hoja
+     * y enviar este archivo al cliente a través de una respuesta http.
+     * */
     public void export(HttpServletResponse response) throws IOException {
 
+        // Agrega el emcabezado y los datos.
         writeHeaderLine();
         writeDataLines();
 
-        ServletOutputStream outputStream = response.getOutputStream();
-        workbook.write(outputStream);
-        workbook.close();
-        outputStream.close();
+        ServletOutputStream outputStream = response.getOutputStream(); // Obtiene el flujo de salida de la respusta http.
+        workbook.write(outputStream); // Escribe el libro de trabajo en el flujo de salida.
+        workbook.close(); // Cierra el libro de trabajo para liberar recursos.
+        outputStream.close(); // Cierra el flujo de salida para liberar recursos.
+
     }
 }
