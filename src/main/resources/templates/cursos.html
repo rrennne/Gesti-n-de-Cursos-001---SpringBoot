@@ -12,7 +12,7 @@
 </head>
 <body>
 <!--Lo que hacemos aca es, entramos en la carpeta 'fragments', buscamos el archivo 'header' y buscamos el framento con el nombre 'header'-->
-<div class="container" th:replace="fragments/header::header"></div>
+<div class="container" th:replace="~{fragments/header::header}"></div>
 
 <div class="container mb-5">
     <div class="container mb-5">
@@ -45,12 +45,13 @@
         </tr>
         </thead>
         <tbody>
+        <!-- Acá en fila <tr> se itera la información con un foreach de la cursoList -->
         <tr th:each="curso : ${cursosList}">
-            <td>[[${curso.id}]]</td>
+            <td>[[${curso.id}]]</td> <!-- Y se itera primero con el id el table data <td> -->
             <td>[[${curso.titulo}]]</td>
             <td>[[${curso.descripcion}]]</td>
             <td>[[${curso.nivel}]]</td> <!-- Podemos hacer esto así ->  -->
-            <!--             <td th:text="${curso.publicado}"></td> &lt;!&ndash; O tambien con este formato. &ndash;&gt;-->
+            <!-- <td th:text="${curso.publicado}"></td> --> <!-- Ó tambien con este formato. -->
             <td>
                 <a th:if="${curso.publicado == true}" class="fa-regular fa-square-check"></a>
                 <a th:if="${curso.publicado == false}" class="fa-regular fa-square icon-dark"></a>
