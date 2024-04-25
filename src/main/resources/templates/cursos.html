@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <meta charset="UTF-8">
     <title>Gestión de cursos</title>
-    <link  rel="stylesheet" type="text/css" th:href=" @{/css/style.css}"/>
 </head>
 <body>
+
 <!--Lo que hacemos aca es, entramos en la carpeta 'fragments', buscamos el archivo 'header' y buscamos el framento con el nombre 'header'-->
 <div class="container" th:replace="~{fragments/header::header}"></div>
 
@@ -25,11 +26,40 @@
     </div>
 </div>
 
-<div class="container">
+<div class="container my-3">
+    <form id="searchForm" th:action="@{/cursos}">
+        <div class="row d-flex">
+            <div class="col-md-3 mt-2">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fa fa-search"></i>
+                    </span>
+                    <input id="keyword" type="search" name="keyword" th:value="${keyword}" required
+                           class="form-control search" placeholder="Ingrese un nombre"/>
+                    <button type="submit" class="btn btn-secondary">Buscar</button>
+                </div>
+            </div>
+            <div class="col-md-3 mt-2">
+                <div class="input-group">
+                    <label class="input-group-text" for="pageSize">Elementos por página</label>
+                    <select form="searchForm" name="size" th:value="${pageSize}" onchange="changePageSize()"
+                            class="size-select" id="pageSize">
+                        <option th:each="s : ${ { 3, 6, 9} }" th:value="${s}" th:text="${s}"
+                                th:selected="${s == pageSize}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Si existe algún curso entonces se mostrara la tabla -->
+<div class="container" th:if="${cursosList.size() > 0}">
     <div class="row mb-3">
         <div class="col-md-12 d-flex justify-content-start">
             <a th:href="@{/export/pdf}" class="btn btn-danger">Generar PDF</a>
-                &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;
             <a th:href="@{/export/excel}" class="btn btn-success">Generar EXCEL</a>
         </div>
     </div>
@@ -66,15 +96,69 @@
         </tbody>
     </table>
 </div>
+<!-- Esta etiqueta unless se toma como un else ya que arriba hay un if -->
+<!-- Y tiene que ser lo mismo que esta en el if arriba -->
+<!-- como no hay cursos, entonces muestra la linea span -->
+<div class="container" th:unless="${cursosList.size() > 0}">
+    <span>Cursos no encontrados</span>
+</div>
 
+<!-- De la misma manera si hay algún curso,entonces mostrara la paginación -->
+<nav aria-label="Pagitanion" th:if="${totalPages > 0}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'"> <!-- Si estamos en la pág 1 entonces se desabilita, si estamos en la pág 2 se habilita -->
+            <a th:replace="fragments/paging :: paging(1,'<<','Primera página')"></a> <!-- nos redirecciona con la paginacion  -->
+        </li>
+        <li class="page-item font-weight-bold" th:classappend="${currentPage == 1} ? 'disabled'"> <!-- Igual que el primer <li>-->
+            <a th:replace="~{fragments/paging :: paging(${currentPage - 1},'Anterior','Anterior página')}"></a> <!-- si esta habilitado, nos resta una pagina y nos redirecciona a esa pagian anteriro -->
+        </li>
+        <li class="page-item disabled" th:if="${currentPage - 2 > 1}"> <!-- El primer que nos indica que tenemos mas paginas atras -->
+            <a class="page-link" href="#">...</a> <!-- Es solo estilo que nos indica que hay paginas no a la vista pero que tenemos anteriores -->
+        </li>
+        <!-- Si estamos en una página se activa -->
+        <!-- Si itera con un foreach dentro de un método .sequence( , ) el cual genera item de tipo <li> eso tiene un rango que se genera así :  -->
+        <!-- Necesito dos valores para el método (inicio, final) estos valores pueden ser muchos elementos o pocos y se muestran de la siguiente manera : -->
+        <!-- Primero vemos si la pagActual es mayor a 2, si lo es, restamos 2 numeros, si no, empieza de 1 -->
+        <!-- Luego pagActual se suman 2, y compara si es mayor que el totalPages, si es menor suma 2 elementos y si es mayor toma el totalPages -->
+        <!--
+             currentPage = 8, totalPages = 9:En este caso, currentPage > 2 ?
+              currentPage - 2 : 1 se evalúa como 8 - 2 = 6, por lo que el inicio
+               del rango de páginas será 6. currentPage + 2 < totalPages ? currentPage
+                + 2 : totalPages se evalúa como 8 + 2 = 10, pero como 10 es mayor que totalPages,
+                 el final del rango de páginas será 9. Por lo tanto, el rango de páginas será 6, 7, 8, 9.
+                 Entonces, la expresión th:each="page : ${#numbers.sequence(6, 9)}" generará iteraciones sobre el rango de páginas 6, 7, 8, 9.
+        -->
+        <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+            th:each="page : ${#numbers.sequence(currentPage > 2 ? currentPage - 2 : 1, currentPage + 2 < totalPages ? currentPage + 2 : totalPages)}">
+            <a th:replace="fragments/paging :: paging(${page}, ${page}, 'Page' + ${page})"></a>
+        </li>
+        <li class="page-item disabled" th:if="${currentPage + 2 > totalPages}"> <!-- Activa este estilo -->
+            <a class="page-link" href="#">...</a>
+        </li>
+        <li class="page-item font-weight-bold" th:classappend="${currentPage == totalPages} ? 'disabled'"> <!-- Es la misma logica que la primera y segunda <li> -->
+            <a th:replace="fragments/paging :: paging(${currentPage + 1}, 'Siguiente', 'Siguiente página')"></a>
+        </li>
+        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+            <a th:replace="fragments/paging :: paging(${totalPages}, '>>', 'Última página')"></a>
+        </li>
+    </ul>
+</nav>
+
+
+<!--Para el formulario de paginación-->
+<script type="text/javascript">
+    function changePageSize(){
+        $("#searchForm").submit();
+    }
+</script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
         integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
         crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 </body>
 </html>

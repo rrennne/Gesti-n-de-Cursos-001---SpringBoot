@@ -1,0 +1,41 @@
+:root {
+  font-size: 16px; /* Establece el tamaño de fuente base */
+}
+
+.message {
+  position: absolute;
+  top: 2.5rem; /* 40px / 16px = 2.5rem */
+  right: 0.3125rem; /* 5px / 16px = 0.3125rem */
+}
+
+.icon-dark {
+  color: grey;
+}
+
+.search {
+  position: relative;
+}
+
+.search input {
+  text-indent: 1.5625rem; /* 25px / 16px = 1.5625rem */
+  border: 0.125rem solid #d6d4d4; /* 2px / 16px = 0.125rem */
+}
+
+.search input:focus {
+  box-shadow: none;
+  border: 0.0625rem solid grey; /* 1px / 16px = 0.0625rem */
+}
+
+.search .fa-search {
+  position: absolute;
+  top: 0.75rem; /* 12px / 16px = 0.75rem */
+  left: 0.625rem; /* 10px / 16px = 0.625rem */
+}
+
+.search-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5rem; /* 80px / 16px = 5rem */
+  background: grey;
+}
