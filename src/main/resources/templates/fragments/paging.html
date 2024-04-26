@@ -1,3 +1,7 @@
+<!-- este fragmento llamado pagin tiene 3 parametros (numero de la pagina, << ó siguiente texto, una etiqueta cuando pasamos el mouse encima de algo)  -->
+<!-- haciendo uso de interpolación de string que es ${...} donde evaluamos expresiones -->
+<!-- tambien hacemos uso de operación ternaria que es una forma concica de realizar una operación condicional
+     donde condición ? valorSiEsVerdadero : valorSiEsFalso -->
 <a th:fragment="paging(pageNum, label, tooltip)" class="page-link"
    th:href="@{'/cursos?' + ${keyword != null && keyword != ''? 'keyword='+ keyword + '&' : ''} + 'page=' + ${pageNum} + '&size=' + ${pageSize}}"
    th:title="${tooltip}" rel="tooltip">
